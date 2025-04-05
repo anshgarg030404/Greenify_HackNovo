@@ -1,0 +1,21 @@
+"use strict";
+var __importDefault = (this && this.__importDefault) || function (mod) {
+    return (mod && mod.__esModule) ? mod : { "default": mod };
+};
+Object.defineProperty(exports, "__esModule", { value: true });
+const express_1 = __importDefault(require("express"));
+const user_1 = require("./router/user");
+const cors_1 = __importDefault(require("cors"));
+const products_1 = require("./router/products");
+const assessment_1 = require("./router/assessment");
+const installation_1 = require("./router/installation");
+const progress_1 = require("./router/progress");
+const app = (0, express_1.default)();
+app.use(express_1.default.json());
+app.use((0, cors_1.default)());
+app.use("/api/v1/user", user_1.userRouter);
+app.use("/api/v1/products", products_1.productRouter);
+app.use("/api/v1/assessment", assessment_1.assessmentRouter);
+app.use("/api/v1/installation", installation_1.installationRouter);
+app.use("/api/v1/progress", progress_1.progressRouter);
+app.listen(3000);

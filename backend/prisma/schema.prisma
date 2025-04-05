@@ -1,0 +1,109 @@
+// This is your Prisma schema file,
+// learn more about it in the docs: https://pris.ly/d/prisma-schema
+
+// Looking for ways to speed up your queries, or scale easily with your serverless or edge functions?
+// Try Prisma Accelerate: https://pris.ly/cli/accelerate-init
+
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider = "postgresql"
+  url      = env("DATABASE_URL")
+}
+
+model User {
+  id          String        @id @default(uuid())
+  name        String
+  email       String        @unique
+  password    String
+  phone       String
+  location    String?
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+  isVerified  Boolean       @default(false)
+  installations Installation[] // One-to-Many relationship with Installation
+  progress    Progress[]    // One-to-Many relationship with Progress
+  assessments Assessment[]  // One-to-Many relationship with Assessment
+}
+
+model Product {
+  id          String        @id @default(uuid())
+  name        String
+  description String
+  price       Float
+  image       String
+  createdAt   DateTime      @default(now())
+  updatedAt   DateTime      @updatedAt
+}
+
+model Installation {
+  id                  String        @id @default(uuid())
+  fullName            String
+  phone               String
+  address             String
+  location            String
+  systemType          String
+  systemSize          String
+  roofSize            Int
+  energyConsumption   Int
+  createdAt           DateTime      @default(now())
+  notes               String?
+  userId              String        // Foreign key to User
+  user                User          @relation(fields: [userId], references: [id]) // Many-to-One relationship with User
+  progress            Progress[]    // One-to-Many relationship with Progress
+  assessments         Assessment[]  // One-to-Many relationship with Assessment
+}
+
+model Progress {
+  id                  String        @id @default(uuid())
+  userId              String        // Foreign key to User
+  user                User          @relation(fields: [userId], references: [id]) // Many-to-One relationship with User
+  installationId      String        // Foreign key to Installation
+  installation        Installation  @relation(fields: [installationId], references: [id]) // Many-to-One relationship with Installation
+  stages              ProgressStage[] // One-to-Many relationship with ProgressStage
+  createdAt           DateTime      @default(now())
+}
+
+model ProgressStage {
+  id                  String        @id @default(uuid())
+  stage               ProgressStageType
+  status              ProgressStatus
+  completionDate      DateTime?
+  progressId          String        // Foreign key to Progress
+  progress            Progress      @relation(fields: [progressId], references: [id]) // Many-to-One relationship with Progress
+}
+
+model Assessment {
+  id                  String        @id @default(uuid())
+  installationId      String        // Foreign key to Installation
+  installation        Installation  @relation(fields: [installationId], references: [id])
+  userId              String        // Foreign key to User
+  user                User          @relation(fields: [userId], references: [id]) // Many-to-One relationship with User
+  assessmentDate      DateTime      @default(now())
+  notes               String?
+  assessorName        String
+  assessorContact     String
+  roofCondition       String
+  shadingAnalysis     String
+  energyUsage         Int
+  recommendations     String?
+  createdAt           DateTime      @default(now())
+}
+
+enum ProgressStageType {
+  INITIAL_CONSULTATION
+  SITE_ASSESSMENT
+  DESIGN_APPROVAL
+  PERMITTING
+  INSTALLATION
+  INSPECTION
+  SYSTEM_ACTIVATION
+}
+
+enum ProgressStatus {
+  NOT_STARTED
+  IN_PROGRESS
+  COMPLETED
+}
